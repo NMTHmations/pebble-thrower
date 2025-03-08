@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PebbleThrower"
-include(":app")
+rootProject.name = "Pebble Thrower"
+include ':app'
