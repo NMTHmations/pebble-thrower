@@ -3,6 +3,7 @@ package com.example.pebblethrower;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import com.example.pebblethrower.databinding.ActivityMainBinding;
@@ -33,4 +34,15 @@ public class MainActivity extends AppCompatActivity {
      * which is packaged with this application.
      */
     public native String stringFromJNI();
+
+    public void ChangeText(View view){
+        TextView tv = binding.sampleText;
+        if (tv.getText().equals("Changed!") == false) {
+            tv.setText("Changed!");
+        }
+        else
+        {
+            tv.setText("Changed back!");
+        }
+    }
 }
