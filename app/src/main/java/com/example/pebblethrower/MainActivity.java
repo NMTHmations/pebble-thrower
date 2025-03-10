@@ -2,8 +2,13 @@ package com.example.pebblethrower;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.pebblethrower.databinding.ActivityMainBinding;
@@ -16,6 +21,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private ActivityMainBinding binding;
+    public SensorManager sensorManager;
+    public Sensor accelometer;
+    public SensorEventListener accEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,24 +33,54 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // Example of a call to a native method
-        TextView tv = binding.sampleText;
-        tv.setText(stringFromJNI());
+        TextView tv = binding.sampleText.findViewById(R.id.sample_text);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        accelometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        accEventListener = new SensorEventListener() {
+
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                float avg = (event.values[0] + event.values[1] + event.values[2]) / 3;
+                tv.setText("" + avg);
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+            }
+        };
     }
 
     /**
      * A native method that is implemented by the 'pebblethrower' native library,
      * which is packaged with this application.
      */
-    public native String stringFromJNI();
 
     public void ChangeText(View view){
-        TextView tv = binding.sampleText;
-        if (tv.getText().equals("Changed!") == false) {
-            tv.setText("Changed!");
+        var button = (Button) view;
+        if (button.getText().toString().equals("Start"))
+        {
+            onResume();
+            button.setText("Stop");
         }
         else
         {
-            tv.setText("Changed back!");
+            onPause();
+            button.setText("Start");
         }
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        sensorManager.registerListener(accEventListener,accelometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        sensorManager.unregisterListener(accEventListener);
     }
 }
