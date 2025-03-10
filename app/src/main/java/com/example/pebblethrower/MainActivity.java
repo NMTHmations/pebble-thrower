@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSensorChanged(SensorEvent event) {
                 float avg = (event.values[0] + event.values[1] + event.values[2]) / 3;
-                tv.setText("" + avg);
+                tv.setText(""+avg);
             }
 
             @Override
@@ -58,15 +58,18 @@ public class MainActivity extends AppCompatActivity {
 
     public void ChangeText(View view){
         var button = (Button) view;
-        if (button.getText().toString().equals("Start"))
+        TextView tv = view.findViewById(R.id.sample_text);
+        if (button.isPressed())
         {
-            onResume();
-            button.setText("Stop");
-        }
-        else
-        {
-            onPause();
-            button.setText("Start");
+            if (button.getText().equals("Start")) {
+                onPause();
+                button.setText("Stop");
+            }
+            else
+            {
+                onResume();
+                button.setText("Start");
+            }
         }
     }
 
@@ -74,13 +77,13 @@ public class MainActivity extends AppCompatActivity {
     public void onResume()
     {
         super.onResume();
-        sensorManager.registerListener(accEventListener,accelometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.unregisterListener(accEventListener);
     }
 
     @Override
     public void onPause()
     {
         super.onPause();
-        sensorManager.unregisterListener(accEventListener);
+        sensorManager.registerListener(accEventListener,accelometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 }
