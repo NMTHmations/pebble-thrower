@@ -2,6 +2,7 @@ package com.example.pebblethrower;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -69,6 +70,9 @@ public class MainActivity extends AppCompatActivity {
             {
                 onResume();
                 button.setText("Start");
+                Intent intent = new Intent(MainActivity.this, TypeName.class);
+                startActivity(intent);
+                finish();
             }
         }
     }
