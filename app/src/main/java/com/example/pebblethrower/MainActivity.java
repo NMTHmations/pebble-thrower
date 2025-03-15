@@ -1,5 +1,7 @@
 package com.example.pebblethrower;
 
+import static java.util.Collections.max;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -14,6 +16,9 @@ import android.widget.TextView;
 
 import com.example.pebblethrower.databinding.ActivityMainBinding;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     // Used to load the 'pebblethrower' library on application startup.
@@ -25,6 +30,9 @@ public class MainActivity extends AppCompatActivity {
     public SensorManager sensorManager;
     public Sensor accelometer;
     public SensorEventListener accEventListener;
+    public boolean FirstAttempt = true;
+    float init_acc = 0;
+    public float avg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +49,16 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSensorChanged(SensorEvent event) {
-                float avg = (event.values[0] + event.values[1] + event.values[2]) / 3;
+                if (FirstAttempt)
+                {
+                    init_acc = event.values[1];
+                    FirstAttempt = false;
+                }
+                List<Float> sensor_data = new ArrayList<Float>();
+                sensor_data.add(Math.abs(event.values[0]));
+                sensor_data.add(Math.abs(event.values[1] - init_acc));
+                sensor_data.add(Math.abs(event.values[2]));
+                avg = max(sensor_data);
                 tv.setText(""+avg);
             }
 
@@ -71,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
                 onResume();
                 button.setText("Start");
                 Intent intent = new Intent(MainActivity.this, TypeName.class);
+                intent.putExtra("VELOCITY",avg);
+                setResult(RESULT_OK,intent);
                 startActivity(intent);
                 finish();
             }
