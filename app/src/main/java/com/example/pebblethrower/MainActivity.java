@@ -27,12 +27,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private ActivityMainBinding binding;
-    public SensorManager sensorManager;
-    public Sensor accelometer;
-    public SensorEventListener accEventListener;
-    public boolean FirstAttempt = true;
-    float init_acc = 0;
-    public float avg;
+    private SensorManager sensorManager;
+    private Sensor accelometer;
+    private SensorEventListener accEventListener;
+    private boolean FirstAttempt = true;
+    private float init_acc = 0;
+    private float maximum;
+    private List<Float> velocity_list = new ArrayList<Float>();
+    public float velocity;
+    private long start;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +61,12 @@ public class MainActivity extends AppCompatActivity {
                 sensor_data.add(Math.abs(event.values[0]));
                 sensor_data.add(Math.abs(event.values[1] - init_acc));
                 sensor_data.add(Math.abs(event.values[2]));
-                avg = max(sensor_data);
-                tv.setText(""+avg);
+                maximum = max(sensor_data);
+                float finish = (float) (start - System.currentTimeMillis()) / (float) 1000;
+                float moment = (float) 1 /2 * maximum * finish * finish;
+                velocity_list.add(moment);
+                tv.setText(""+moment);
+                start = System.currentTimeMillis();
             }
 
             @Override
@@ -81,14 +88,21 @@ public class MainActivity extends AppCompatActivity {
         {
             if (button.getText().equals("Start")) {
                 onPause();
+                start = System.currentTimeMillis();
                 button.setText("Stop");
             }
             else
             {
                 onResume();
                 button.setText("Start");
+                float sum = 0;
+                for (var i : velocity_list)
+                {
+                    sum += i;
+                }
+                velocity = sum / velocity_list.size();
                 Intent intent = new Intent(MainActivity.this, TypeName.class);
-                intent.putExtra("VELOCITY",avg);
+                intent.putExtra("VELOCITY",velocity);
                 setResult(RESULT_OK,intent);
                 startActivity(intent);
                 finish();
