@@ -1,0 +1,37 @@
+package com.example.pebblethrower;
+
+import android.os.Bundle;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.room.Room;
+
+import com.example.pebblethrower.databinding.LeaderboardBinding;
+import com.example.pebblethrower.model.AppDatabase;
+import com.example.pebblethrower.model.User;
+import com.example.pebblethrower.model.UserDAO;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Leaderboard extends AppCompatActivity {
+    private LeaderboardBinding binding;
+    @Override
+    protected void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        binding = LeaderboardBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        /*
+        AppDatabase db = Room.databaseBuilder(getApplicationContext(),
+                AppDatabase.class, "database-name").build();
+        UserDAO userDao = db.userDao();
+        List<User> userList = userDao.getAll();
+        StringBuilder result = new StringBuilder();
+        for (var i : userList)
+        {
+            result.append("Name: "+i.name+" Velocity"+i.max_velocity);
+        }
+        TextView tv = findViewById(R.id.textView4);
+        tv.setText(result);*/
+    }
+}

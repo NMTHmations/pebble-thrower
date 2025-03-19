@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".TypeName">
 
     <TextView
         android:id="@+id/textView2"
@@ -38,6 +38,7 @@
         android:id="@+id/button3"
         android:layout_width="195dp"
         android:layout_height="wrap_content"
+        android:onClick="onRegister"
         android:text="Register"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
