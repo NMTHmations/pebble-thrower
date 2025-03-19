@@ -21,17 +21,20 @@ public class Leaderboard extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = LeaderboardBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        /*
         AppDatabase db = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "database-name").build();
-        UserDAO userDao = db.userDao();
-        List<User> userList = userDao.getAll();
+                AppDatabase.class, "database-name").allowMainThreadQueries().build(); // not recommended, but only works in this way
+        //User user = new User(getIntent().getStringExtra("NAME"),getIntent().getFloatExtra("VELOCITY",0.0f));
+        User user = new User();
+        user.setName(getIntent().getStringExtra("NAME"));
+        user.setVelocity(getIntent().getFloatExtra("VELOCITY",0.0f));
+        db.userDao().Insert(user);
+        List<User> userList =  db.userDao().getAll();
         StringBuilder result = new StringBuilder();
         for (var i : userList)
         {
-            result.append("Name: "+i.name+" Velocity"+i.max_velocity);
+            result.append("Name: "+i.name+", Velocity: "+i.max_velocity);
         }
         TextView tv = findViewById(R.id.textView4);
-        tv.setText(result);*/
+        tv.setText(result);
     }
 }
