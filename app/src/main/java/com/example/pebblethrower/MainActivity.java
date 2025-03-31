@@ -37,15 +37,17 @@ public class MainActivity extends AppCompatActivity {
     public float velocity;
     private long start;
 
+    private float distance;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         // Example of a call to a native method
         TextView tv = binding.sampleText.findViewById(R.id.sample_text);
+        TextView dist = binding.sampleText2.findViewById(R.id.sample_text2);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         accEventListener = new SensorEventListener() {
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 {
                     init_acc = event.values[1];
                     FirstAttempt = false;
+                    distance = 0;
                 }
                 List<Float> sensor_data = new ArrayList<Float>();
                 sensor_data.add(Math.abs(event.values[0]));
@@ -65,7 +68,9 @@ public class MainActivity extends AppCompatActivity {
                 float finish = (float) (start - System.currentTimeMillis()) / (float) 1000;
                 float moment = (float) 1 /2 * maximum * finish * finish;
                 velocity_list.add(moment);
+                distance += moment * finish;
                 tv.setText(""+moment);
+                dist.setText(Float.toString(distance));
                 start = System.currentTimeMillis();
             }
 
@@ -115,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
     {
         super.onResume();
         sensorManager.unregisterListener(accEventListener);
+        FirstAttempt = true;
     }
 
     @Override
