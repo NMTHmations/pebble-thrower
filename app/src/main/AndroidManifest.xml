@@ -23,7 +23,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".TypeName"/>
-        <activity android:name=".Leaderboard" />
+        <activity android:name=".Leaderboard"
+            android:configChanges="orientation|screenSize|keyboardHidden"/>
     </application>
 
 </manifest>
