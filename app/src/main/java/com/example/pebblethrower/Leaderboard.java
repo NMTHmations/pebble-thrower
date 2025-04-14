@@ -13,7 +13,17 @@ import com.example.pebblethrower.databinding.LeaderboardBinding;
 import com.example.pebblethrower.model.AppDatabase;
 import com.example.pebblethrower.model.User;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class Leaderboard extends AppCompatActivity {
     StringBuilder result = new StringBuilder();
@@ -57,18 +67,53 @@ public class Leaderboard extends AppCompatActivity {
         finish();
     }
 
-    public void switched(View view)
-    {
+    public void switched(View view) throws IOException {
         //User user = new User(getIntent().getStringExtra("NAME"),getIntent().getFloatExtra("VELOCITY",0.0f));
         Switch switch_controller = (Switch) findViewById(R.id.switch1);
+        TextView tv = findViewById(R.id.textView4);
         if (!switch_controller.isChecked()) {
-            TextView tv = findViewById(R.id.textView4);
             tv.setText(result);
         }
         else
         {
-            TextView tv = findViewById(R.id.textView4);
-            tv.setText("The online leaderboard will show up here");
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(getResources().getString(R.string.get_list_api_endpoint))
+                    .build();
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    e.printStackTrace();
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        StringBuilder string = new StringBuilder();
+                        String responseData = response.body().string();
+                        try {
+                            responseData = responseData.substring(1,responseData.length() - 1);
+                            JSONArray arrayJson = new JSONArray(responseData);
+                            if (arrayJson.length() == 0)
+                            {
+                                string.append("The results from the online leaderboard will show up here\n");
+                            }
+                            for (int i = 0; i < arrayJson.length(); i++)
+                            {
+                                string.append("Data: "+arrayJson.get(i));
+                            }
+                        } catch (JSONException e) {
+                            string.append("Error happened, when we tried to fetch the data! Check back later.\n");
+                        }
+                        Leaderboard.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                tv.setText(string.toString());
+                            }
+                        });
+                    }
+                }
+            });
         }
     }
 }
