@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
                 velocity = sum / velocity_list.size();
                 Intent intent = new Intent(MainActivity.this, TypeName.class);
                 intent.putExtra("VELOCITY",velocity);
+                intent.putExtra("DISTANCE",distance);
                 setResult(RESULT_OK,intent);
                 startActivity(intent);
                 finish();

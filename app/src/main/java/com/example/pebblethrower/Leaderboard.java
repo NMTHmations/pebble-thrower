@@ -2,6 +2,7 @@ package com.example.pebblethrower;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import okhttp3.Call;
@@ -78,7 +80,7 @@ public class Leaderboard extends AppCompatActivity {
         {
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder()
-                    .url(getResources().getString(R.string.get_list_api_endpoint))
+                    .url(getResources().getString(R.string.api_endpoint_getlist))
                     .build();
             client.newCall(request).enqueue(new Callback() {
                 @Override
@@ -92,17 +94,19 @@ public class Leaderboard extends AppCompatActivity {
                         StringBuilder string = new StringBuilder();
                         String responseData = response.body().string();
                         try {
-                            responseData = responseData.substring(1,responseData.length() - 1);
-                            JSONArray arrayJson = new JSONArray(responseData);
-                            if (arrayJson.length() == 0)
-                            {
-                                string.append("The results from the online leaderboard will show up here\n");
-                            }
-                            for (int i = 0; i < arrayJson.length(); i++)
-                            {
-                                string.append("Data: "+arrayJson.get(i));
-                            }
+                                JSONArray wrapped = new JSONArray("[" + responseData + "]");
+                                String innerJsonString = wrapped.getString(0);
+
+                                // Then parse that string into a real JSONArray
+                                JSONArray arrayJson = new JSONArray(innerJsonString);
+                                if (arrayJson.length() == 0) {
+                                    string.append("The results from the online leaderboard will show up here\n");
+                                }
+                                for (int i = 0; i < arrayJson.length(); i++) {
+                                    string.append("Data: " + arrayJson.getJSONObject(i).getString("name")+ "\n");
+                                }
                         } catch (JSONException e) {
+                            Log.d("ERROR",e.getMessage());
                             string.append("Error happened, when we tried to fetch the data! Check back later.\n");
                         }
                         Leaderboard.this.runOnUiThread(new Runnable() {
