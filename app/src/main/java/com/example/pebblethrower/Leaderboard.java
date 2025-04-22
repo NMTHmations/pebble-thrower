@@ -34,7 +34,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class Leaderboard extends AppCompatActivity {
-    StringBuilder result = new StringBuilder();
 
     ListView item;
 
@@ -168,7 +167,6 @@ public class Leaderboard extends AppCompatActivity {
                                 item.setAdapter(adapter);
                                 item.setOnItemClickListener((parent, view1, position, id) -> {
                                     ListItem selectedItem = (ListItem) parent.getItemAtPosition(position);
-                                    Log.d("POS",selectedItem.id);
                                     if (!selectedItem.id.equals("dont-click"))
                                     {
                                         openChrome(view,selectedItem.id);
