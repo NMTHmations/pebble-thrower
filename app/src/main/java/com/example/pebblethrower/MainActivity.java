@@ -20,6 +20,7 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Size;
@@ -77,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
     private Surface recorderSurface;
     private boolean isRecording = false;
     private TextureView textureView;
+    private String outputFile = Environment.getExternalStorageDirectory() + "/video_" + System.currentTimeMillis() + ".mp4";
 
 
     @Override
@@ -175,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, TypeName.class);
             intent.putExtra("VELOCITY", velocity);
             intent.putExtra("DISTANCE", distance);
+            intent.putExtra("FILENAME_PATH",outputFile);
             setResult(RESULT_OK, intent);
             startActivity(intent);
             finish();
@@ -313,8 +316,6 @@ public class MainActivity extends AppCompatActivity {
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-
-        String outputFile = getExternalFilesDir(null) + "/video_" + System.currentTimeMillis() + ".mp4";
         Log.d("MediaRecorder","Output file: "+outputFile);
         mediaRecorder.setOutputFile(outputFile);
 

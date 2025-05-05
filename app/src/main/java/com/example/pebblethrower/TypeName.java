@@ -1,7 +1,9 @@
 package com.example.pebblethrower;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -13,12 +15,15 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.example.pebblethrower.databinding.TypeNameBinding;
 import com.google.gson.Gson;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -39,6 +44,7 @@ public class TypeName extends AppCompatActivity {
         String name = tv.getText().toString();
         float max_velocity = getIntent().getFloatExtra("VELOCITY",0.0f);
         float distance = getIntent().getFloatExtra("DISTANCE",0.0f);
+        String path = getIntent().getStringExtra("FILENAME_PATH");
         Intent intent = new Intent(TypeName.this, Leaderboard.class);
         intent.putExtra("NAME",name);
         intent.putExtra("VELOCITY",max_velocity);
@@ -59,10 +65,81 @@ public class TypeName extends AppCompatActivity {
         String myJSON = new Gson().toJson(fluid);
         Log.d("JWT",myJSON);
         insertThrow(getResources().getString(R.string.api_endpoint_setdata),myJSON);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Background work here
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+                // To update UI, use a Handler or runOnUiThread
+            }
+        }).start();
+        UploadFile(path);
         setResult(RESULT_OK,intent);
         startActivity(intent);
         finish();
     }
+
+    void UploadFile(String path) throws IOException{
+        File file = new File(this.getFilesDir(), path);
+        if (file.exists())
+        {
+            uploadFile(file, path);
+        }
+        else
+        {
+            file = new File(Environment.getExternalStorageDirectory(),path);
+            if (file.exists())
+            {
+                uploadFile(file, path);
+            }
+        }
+    }
+
+    public void uploadFile(File fileToUpload, String path) {
+        String[] paths = path.split("/");
+        String filename = paths[paths.length - 1];
+        OkHttpClient client = new OkHttpClient();
+
+        // Create file request body
+        RequestBody fileBody = RequestBody.create(fileToUpload, MediaType.parse("application/octet-stream"));
+
+        // Build multipart form
+        MultipartBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", fileToUpload.getName(), fileBody)
+                .build();
+
+        // Build request
+        Request request = new Request.Builder()
+                .url(getResources().getString(R.string.upload_file_endpoint)+ filename + "/")
+                .post(requestBody)
+                .build();
+
+        // Make async request
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                // Notify UI thread
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String result = response.body().string();
+                    Log.d("UPLOAD", "Success: " + result);
+                } else {
+                    Log.e("UPLOAD", "Failed: " + response.code());
+                }
+            }
+        });
+    }
+
 
     void insertThrow(String postURL, String POSTbody) throws IOException {
         OkHttpClient http = new OkHttpClient();
