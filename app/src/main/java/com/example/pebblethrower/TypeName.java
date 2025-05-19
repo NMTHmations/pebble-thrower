@@ -1,14 +1,23 @@
 package com.example.pebblethrower;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.Manifest;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -17,9 +26,17 @@ import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -40,11 +57,16 @@ public class TypeName extends AppCompatActivity {
     }
 
     public void onRegister(View view) throws IOException {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
+        }
         TextView tv = (TextView) findViewById(R.id.editTextText3);
         String name = tv.getText().toString();
         float max_velocity = getIntent().getFloatExtra("VELOCITY",0.0f);
         float distance = getIntent().getFloatExtra("DISTANCE",0.0f);
-        String path = getIntent().getStringExtra("FILENAME_PATH");
+        boolean is_recorded = getIntent().getBooleanExtra("IS_RECORDED",false);
         Intent intent = new Intent(TypeName.this, Leaderboard.class);
         intent.putExtra("NAME",name);
         intent.putExtra("VELOCITY",max_velocity);
@@ -78,25 +100,25 @@ public class TypeName extends AppCompatActivity {
                 // To update UI, use a Handler or runOnUiThread
             }
         }).start();
-        UploadFile(path);
+        if (is_recorded) {
+            Log.d("File",String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM+"/Camera")));
+            File dcimDir = new File(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)));
+            File cameraDir = new File(dcimDir, "Camera");
+            Log.d("Hehe",cameraDir.getAbsolutePath());
+            String path = getNewestFileInDirectory(cameraDir).getPath();
+            Log.d("path",path);
+            UploadFile(path);
+        }
         setResult(RESULT_OK,intent);
         startActivity(intent);
         finish();
     }
 
     void UploadFile(String path) throws IOException{
-        File file = new File(this.getFilesDir(), path);
+        File file = new File(path);
         if (file.exists())
         {
             uploadFile(file, path);
-        }
-        else
-        {
-            file = new File(Environment.getExternalStorageDirectory(),path);
-            if (file.exists())
-            {
-                uploadFile(file, path);
-            }
         }
     }
 
@@ -156,5 +178,22 @@ public class TypeName extends AppCompatActivity {
                 Log.d("TAG",response.body().string());
             }
         });
+    }
+
+    private File getNewestFileInDirectory(File directory) {
+        File[] files = directory.listFiles();
+
+        if (files == null || files.length == 0) {
+            return null;
+        }
+
+        File newestFile = files[0];
+        for (File file : files) {
+            if (file.lastModified() > newestFile.lastModified()) {
+                newestFile = file;
+            }
+        }
+
+        return newestFile;
     }
 }
